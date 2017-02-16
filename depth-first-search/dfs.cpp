@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
 #include <GL/glut.h>
-#include "graph-graphics.h"
+#include "../include/graph-graphics.h"
 
 using namespace std;
 
