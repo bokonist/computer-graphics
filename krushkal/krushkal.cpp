@@ -2,6 +2,7 @@
 #include <GL/glut.h>
 #include "../include/graph-graphics.h"
 using namespace std;
+#define dbg(i) cout<<"\nbreak "<<i<<endl;
 
 int *color; // holds the colors of nodes
 int *ecolor; //holds the colors of edges for final shortest path display
@@ -17,13 +18,65 @@ void display(); // prototype
 
 bool done=false; //to display the result if the algo is done running
 set<int> MST; // set to maintain members of MST
+set< set< int > > MSS; // min spanning set of sets
+
+bool cycle(int x, int y)
+{
+	// does the set containing x and the set containing y have an intersection? if so, cycle
+	set<int> *temp1, *temp2;
+	for(auto a : MSS)
+	{
+		if(a.count(x) > 0)
+			temp1=&a;
+		if(a.count(y) > 0)
+			temp2=&a;
+	}
+	set<int> intersection;
+//	set<int>::iterator it;
+	CONTINUE HERE
+	set_intersection(temp1->begin(),temp1->end(),temp2->begin(),temp2->end()) , intersection.begin();
+	if(v.size() == 0) // no intersection
+		return false;
+	else //else consolidate the two sets in the MSS
+	{
+		temp1.insert(y);
+		temp2.clear();
+		return true;
+	}
+}
+
+void krushkalInit()
+{
+	set<int> temp;
+	for(int i=0;i<n;i++)
+	{
+		temp.insert(i);
+		MSS.insert(temp);
+		temp.clear();
+	}
+}
+void displayvec()
+{
+	for(auto a : edges)
+	{
+		for(auto b : a)
+		{
+			//cout<<b[0]<<" "<<b[1]<<" "<<b[2]<<endl;
+			cout<<b<<" ";
+		}
+		cout<<endl;	
+	}
+}
 
 bool compare(vector<int> a, vector<int> b)  
 {  
-    return (a[2]>b[2]);	
+    return (a[2]>=	b[2]); // >	
 }
+
 void EraseEdge(int u,int v)
 {
+	cout<<"erasing "<<u<<" "<<v<<endl;
+	displayvec();
 	int count=0;
 	for(auto a: adjlist[u])
 	{
@@ -38,7 +91,15 @@ void EraseEdge(int u,int v)
 void krushkal() // dijkstra algo
 {
 	sort(edges.begin(),edges.end(),compare); // sort in ascending order
+	//w_sort();
 	cout<<"done sorting";
+	displayvec();
+	dbg(1);
+	/*for(auto a : edges)
+	{
+		cout<<a[0]<<endl;
+	}*/
+	//cout<<edges.front()[2];
 	vector<int> temp;
 	temp = edges.back();
 	edges.pop_back();
@@ -48,16 +109,27 @@ void krushkal() // dijkstra algo
 	{
 		temp= edges.back();
 		edges.pop_back();
-		if(MST.count(temp[1]) == 0)
+		if(!cycle(temp[0],temp[1]))
+		{
+			MST.insert(temp[0]);
+			MST.insert(temp[0]);
+		}
+		else
+		{
+			EraseEdge(temp[0],temp[1]);
+		}
+		/*if(MST.count(temp[1]) == 0)
 		{
 			MST.insert(temp[1]);
 		}
 		else // else, there's a cycle. delete that expensive cyclic edge
 		{
 			EraseEdge(temp[0],temp[1]);
-		}
+		}*/
 	}
 	done=true;
+	dbg(2);
+	return;
 	//display();
 }
 
@@ -75,11 +147,12 @@ void mouse(int button, int state, int x, int y)
             display();
         }
     }
-    if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)   
+    else if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN)   
     {
         cout<<"\nRunning Krushkal\n";
 		krushkal();
-		//done=true;
+		dbg(3);
+		display();
     }
 }
 void display()
@@ -106,18 +179,18 @@ void display()
 	        }
 	    }
 	}
-	else //dijkstra is done. now display the result
+	else if(done) //dijkstra is done. now display the result
 	{
 		cout<<"\n Done. Displaying result.\n";
 		for(auto a : MST)
 		{
 			color[a] = GREEN;
 		}
-		/*for(int i=0;i<vt;i++)
+		for(int i=0;i<vt;i++)
 	    {
-	        str=to_string(::distance[i]);
+	        str=to_string(i);
 	        drawCircle(color[i],coordinates[i]);
-	    }*/
+	    }
         for(int i=0;i<n;i++)
         {
         	vector< pair <int ,int > > neighbours = adjlist[i];
@@ -151,13 +224,15 @@ int main(int argc, char** argv)
 		w_edge.push_back(w);
 		adjlist[u].push_back(make_pair(v,w));
 		edges.push_back(w_edge);
+		w_edge.clear();
 	}
+	krushkalInit();
 	/**/
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(700, 700);
 	glutInitWindowPosition(100, 100);
-	glutCreateWindow("Dijkstra");
+	glutCreateWindow("Krushkal");
 	glutDisplayFunc(display);
 	glutMouseFunc(mouse);
 	glutReshapeFunc(handleResize);
