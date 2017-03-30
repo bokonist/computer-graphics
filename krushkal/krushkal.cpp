@@ -20,31 +20,72 @@ bool done=false; //to display the result if the algo is done running
 set<int> MST; // set to maintain members of MST
 set< set< int > > MSS; // min spanning set of sets
 
+void combineSets(set<int> a , set<int> b)
+{
+	set<int> combined;
+	for(auto it : a)
+	{
+		combined.insert(it);
+	}
+	for(auto it : b)
+	{
+		combined.insert(it);
+	}
+	MSS.erase(a);
+	MSS.erase(b);
+	MSS.insert(combined);
+}
+
+void displaySet(set<int> &a , int key=-1)
+{
+	if(key!= -1)
+		cout<<"Set containing "<<key<<" is ";
+
+	for(auto b : a)
+	{
+		cout<<b<<",";
+	}
+	cout<<endl;
+}
+
+void displayMSS()
+{
+	cout<<"\n{  ";
+	for(auto a : MSS)
+	{
+		cout<<"{ ";
+		for(auto b : a)
+		{
+			cout<<b<<",";
+		}
+		cout<<" }";
+	}
+	cout<<"  }\n";
+}
+
 bool cycle(int x, int y)
 {
 	// does the set containing x and the set containing y have an intersection? if so, cycle
-	set<int> *temp1, *temp2;
+	set<int> temp1, temp2;
 	//find the sets containing x and y
 	for(auto a : MSS)
 	{
 		if(a.count(x) > 0)
-			temp1=&a;
-		if(a.count(y) > 0)
-			temp2=&a;
-	}
-	set<int> intersection;
-//	set<int>::iterator it;
-	//cycle detection code
-	for(auto a : *temp1)
-	{
-		if(temp2->count(a) > 0)
 		{
-			intersection.insert(a);
+			temp1=a;
+			displaySet(temp1,x);
+		}
+		if(a.count(y) > 0)
+		{
+			temp2=a;
+			displaySet(temp2,y);
 		}
 	}
-	for(auto a : *temp2)
+	set<int> intersection;
+	//cycle detection code
+	for(auto a : temp1)
 	{
-		if(temp1->count(a) > 0)
+		if(temp2.count(a) > 0)
 		{
 			intersection.insert(a);
 		}
@@ -54,9 +95,9 @@ bool cycle(int x, int y)
 		return true;
 	else //else no cycle. consolidate the two sets in the MSS
 	{
-		temp1->insert(y); //insert the 2nd element into the first set
-		temp2->clear(); // clear the second set
-		delete temp2; //clear the memory
+		cout<<" consolidating "<<x<<"and"<<y;
+		combineSets(temp1,temp2);
+		displayMSS();
 		return false;
 	}
 }
@@ -77,7 +118,6 @@ void displayvec()
 	{
 		for(auto b : a)
 		{
-			//cout<<b[0]<<" "<<b[1]<<" "<<b[2]<<endl;
 			cout<<b<<" ";
 		}
 		cout<<endl;	
@@ -86,7 +126,7 @@ void displayvec()
 
 bool compare(vector<int> a, vector<int> b)  
 {  
-    return (a[2]>=	b[2]); // >	
+    return (a[2] >=	b[2]); // >	
 }
 
 void EraseEdge(int u,int v)
@@ -107,18 +147,13 @@ void EraseEdge(int u,int v)
 void krushkal() // dijkstra algo
 {
 	sort(edges.begin(),edges.end(),compare); // sort in ascending order
-	//w_sort();
 	cout<<"done sorting";
 	displayvec();
 	dbg(1);
-	/*for(auto a : edges)
-	{
-		cout<<a[0]<<endl;
-	}*/
-	//cout<<edges.front()[2];
 	vector<int> temp;
 	temp = edges.back();
 	edges.pop_back();
+	cycle(temp[0],temp[1]);
 	MST.insert(temp[0]);
 	MST.insert(temp[1]);
 	while(!edges.empty())
@@ -132,21 +167,12 @@ void krushkal() // dijkstra algo
 		}
 		else
 		{
+			cout<<"Erasing edge "<<temp[0]<<" "<<temp[1]<<endl;
 			EraseEdge(temp[0],temp[1]);
 		}
-		/*if(MST.count(temp[1]) == 0)
-		{
-			MST.insert(temp[1]);
-		}
-		else // else, there's a cycle. delete that expensive cyclic edge
-		{
-			EraseEdge(temp[0],temp[1]);
-		}*/
 	}
 	done=true;
-	dbg(2);
 	return;
-	//display();
 }
 
 
@@ -167,7 +193,6 @@ void mouse(int button, int state, int x, int y)
     {
         cout<<"\nRunning Krushkal\n";
 		krushkal();
-		dbg(3);
 		display();
     }
 }
