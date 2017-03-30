@@ -24,6 +24,7 @@ bool cycle(int x, int y)
 {
 	// does the set containing x and the set containing y have an intersection? if so, cycle
 	set<int> *temp1, *temp2;
+	//find the sets containing x and y
 	for(auto a : MSS)
 	{
 		if(a.count(x) > 0)
@@ -33,7 +34,7 @@ bool cycle(int x, int y)
 	}
 	set<int> intersection;
 //	set<int>::iterator it;
-	//CONTINUE HERE
+	//cycle detection code
 	for(auto a : *temp1)
 	{
 		if(temp2->count(a) > 0)
@@ -49,7 +50,7 @@ bool cycle(int x, int y)
 		}
 	}
 	//set_intersection(temp1->begin(),temp1->end(),temp2->begin(),temp2->end() , intersection.begin());
-	if(intersection.size() > 0) // intersection
+	if(intersection.size() > 0) // intersection. cycle detected
 		return true;
 	else //else no cycle. consolidate the two sets in the MSS
 	{
@@ -246,7 +247,7 @@ int main(int argc, char** argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize(700, 700);
-	glutInitWindowPosition(100, 100);
+	glutInitWindowPosition(500, 100);
 	glutCreateWindow("Krushkal");
 	glutDisplayFunc(display);
 	glutMouseFunc(mouse);
