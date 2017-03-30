@@ -33,15 +33,30 @@ bool cycle(int x, int y)
 	}
 	set<int> intersection;
 //	set<int>::iterator it;
-	CONTINUE HERE
-	set_intersection(temp1->begin(),temp1->end(),temp2->begin(),temp2->end()) , intersection.begin();
-	if(v.size() == 0) // no intersection
-		return false;
-	else //else consolidate the two sets in the MSS
+	//CONTINUE HERE
+	for(auto a : *temp1)
 	{
-		temp1.insert(y);
-		temp2.clear();
+		if(temp2->count(a) > 0)
+		{
+			intersection.insert(a);
+		}
+	}
+	for(auto a : *temp2)
+	{
+		if(temp1->count(a) > 0)
+		{
+			intersection.insert(a);
+		}
+	}
+	//set_intersection(temp1->begin(),temp1->end(),temp2->begin(),temp2->end() , intersection.begin());
+	if(intersection.size() > 0) // intersection
 		return true;
+	else //else no cycle. consolidate the two sets in the MSS
+	{
+		temp1->insert(y); //insert the 2nd element into the first set
+		temp2->clear(); // clear the second set
+		delete temp2; //clear the memory
+		return false;
 	}
 }
 
@@ -112,7 +127,7 @@ void krushkal() // dijkstra algo
 		if(!cycle(temp[0],temp[1]))
 		{
 			MST.insert(temp[0]);
-			MST.insert(temp[0]);
+			MST.insert(temp[1]);
 		}
 		else
 		{
@@ -184,7 +199,7 @@ void display()
 		cout<<"\n Done. Displaying result.\n";
 		for(auto a : MST)
 		{
-			color[a] = GREEN;
+			color[a] = BLACK;
 		}
 		for(int i=0;i<vt;i++)
 	    {
